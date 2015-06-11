@@ -17,7 +17,7 @@ func TestIR(t *testing.T) {
 
 	fmt.Printf("| %-5t | %-5t | %-5t | %-5t  |\n", left, right, lineLeft, lineRight)
 
-	for {
+	for i := 0; i < 5; i++ {
 		// calculate new values
 		newL, newR, newLineL, newLineR := ir.Left(), ir.Right(), ir.LeftLine(), ir.RightLine()
 

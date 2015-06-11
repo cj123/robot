@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetDistance(t *testing.T) {
-	for i := 0; i < 40; i++ {
+	for i := 0; i < 10; i++ {
 		fmt.Printf("Distance: %dcm\n", GetDistance())
 		time.Sleep(2 * time.Second)
 	}

@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"github.com/cj123/robot/web"
+)
 
 func main() {
-    fmt.Println("Hi! I'll probably have robot stuff :)")
+	// start the web server
+	web.Start()
 }

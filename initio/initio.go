@@ -16,7 +16,7 @@ func init() {
 }
 
 func Cleanup() {
-	//Stop()       // stop motors
+	Stop()       // stop motors
 	StopServos() // stop servos
-	rpio.Close()
+	//	rpio.Close()
 }
