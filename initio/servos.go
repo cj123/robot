@@ -28,22 +28,25 @@ func StopServos() {
 
 // start the servos
 func StartServos() {
-	startServod()
+	fmt.Println("Starting servos...")
+	err := startServod()
+
+	if err != nil {
+		panic(err)
+	}
 }
 
 func startServod() error {
-	// run the command
-	cmd := exec.Command("./servod", "--pcm", "--idle-timeout=20000", `--p1pins="18,22"`, ">/dev/null")
 
-	err := cmd.Start()
+	// run the command ./servod --pcm --idle-timeout=20000 --p1pins="18,22"
+	cmd := exec.Command("sudo", "sh", "-c", "servod --pcm --idle-timeout=20000 --p1pins=\"18,22\"")
+	err := cmd.Run()
 
-	if err != nil {
-		return err
-	}
-
-	err = cmd.Wait()
+	fmt.Println("Starting servod")
 
 	if err != nil {
+		fmt.Println(err)
+		panic(err)
 		return err
 	}
 
@@ -53,16 +56,12 @@ func startServod() error {
 }
 
 func stopServod() error {
-	cmd := exec.Command("sudo", "pkill", "-f", "servod")
-	err := cmd.Start()
+	cmd := exec.Command("sudo", "sh", "-c", "killall servod")
+	err := cmd.Run()
 
 	if err != nil {
-		return err
-	}
-
-	err = cmd.Wait()
-
-	if err != nil {
+		fmt.Println(err)
+		panic(err)
 		return err
 	}
 
@@ -72,8 +71,8 @@ func stopServod() error {
 }
 
 func pinServod(pin int, degrees int) {
-	pinString := fmt.Sprintf("%d=%d", pin, 50+((90-degrees)*200/180))
-
+	pinString := fmt.Sprintf("%d=%d\n", pin, 50+((90-degrees)*200/180))
+	fmt.Println(pinString)
 	err := ioutil.WriteFile("/dev/servoblaster", []byte(pinString), 0644)
 
 	if err != nil {

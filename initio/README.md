@@ -13,3 +13,7 @@ the initio package (as provided [here](http://4tronix.co.uk/initio)), but rewrit
 
 * servos incl testing
 * motors incl testing
+
+## note
+
+expects `servod` to be in your PATH on the pi :)

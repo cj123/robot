@@ -11,8 +11,8 @@ func init() {
 		panic(err)
 	}
 
+	// setup the servos
 	StartServos()
-
 }
 
 func Cleanup() {
