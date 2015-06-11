@@ -10,8 +10,13 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	StartServos()
+
 }
 
 func Cleanup() {
+	//Stop()       // stop motors
+	StopServos() // stop servos
 	rpio.Close()
 }

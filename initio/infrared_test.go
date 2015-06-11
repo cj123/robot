@@ -15,7 +15,7 @@ func TestIR(t *testing.T) {
 	fmt.Println("| Left  | Right | LLeft | LRight |")
 	fmt.Println("----------------------------------")
 
-	fmt.Printf("| %-5t | %-5t | %-5t | %-5t  |", left, right, lineLeft, lineRight)
+	fmt.Printf("| %-5t | %-5t | %-5t | %-5t  |\n", left, right, lineLeft, lineRight)
 
 	for {
 		// calculate new values
