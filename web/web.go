@@ -98,11 +98,32 @@ func servos(s []string, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 	}
 
-	val, _ := strconv.Atoi(s[2])
+	servo := -1
 
+	// which servo are we using?
 	if s[1] == "pan" {
-		initio.SetServo(initio.Pan, val)
+		servo = initio.Pan
 	} else if s[1] == "tilt" {
-		initio.SetServo(initio.Tilt, val)
+		servo = initio.Tilt
+	} else {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+	}
+
+	// process the request
+	if s[2] == "set" {
+		val, _ := strconv.Atoi(s[3])
+
+		// set the servo to this pos
+		initio.SetServo(servo, val)
+	} else if s[2] == "inc" {
+		val, _ := strconv.Atoi(s[3])
+
+		// increment the servo
+		initio.IncServo(servo, val)
+	} else if s[2] == "get" {
+		// return servo pos
+		fmt.Fprintf(w, "%d", initio.GetServo(servo))
+	} else if s[2] == "reset" {
+		initio.ResetServo(servo)
 	}
 }

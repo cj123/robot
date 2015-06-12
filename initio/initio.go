@@ -13,6 +13,10 @@ func init() {
 
 	// setup the servos
 	StartServos()
+
+	// set them to known values
+	SetServo(Tilt, DEFAULT_VAL)
+	SetServo(Pan, DEFAULT_VAL)
 }
 
 func Cleanup() {
