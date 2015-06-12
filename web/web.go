@@ -7,16 +7,17 @@ import (
 	"fmt"
 	"github.com/cj123/robot/initio" // our robot commands
 	"net/http"
+	"strconv"
 	"strings"
 )
 
-func Start() {
+func Start(address string) {
 	http.HandleFunc("/api/", apihandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(r.URL.Path[1:])
 		http.ServeFile(w, r, "web/static/"+r.URL.Path[1:])
 	}) // static files
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(address, nil)
 }
 
 var routes = map[string]func(s []string, w http.ResponseWriter, r *http.Request){
@@ -74,10 +75,34 @@ func ir(s []string, w http.ResponseWriter, r *http.Request) {
 
 // motors data
 func motors(s []string, w http.ResponseWriter, r *http.Request) {
+	if len(s) < 2 {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+	}
 
+	if s[1] == "forwards" {
+		initio.Forward(0) // speed TODO
+	} else if s[1] == "reverse" {
+		initio.Reverse(0)
+	} else if s[1] == "left" {
+		initio.SpinLeft(0)
+	} else if s[1] == "right" {
+		initio.SpinRight(0)
+	} else if s[1] == "stop" {
+		initio.Stop()
+	}
 }
 
 // servos data
 func servos(s []string, w http.ResponseWriter, r *http.Request) {
+	if len(s) < 3 {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+	}
 
+	val, _ := strconv.Atoi(s[2])
+
+	if s[1] == "pan" {
+		initio.SetServo(initio.Pan, val)
+	} else if s[1] == "tilt" {
+		initio.SetServo(initio.Tilt, val)
+	}
 }

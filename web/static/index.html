@@ -29,6 +29,12 @@
 			})
 		}, 1000);
 	});
+
+
+	function move(direction) {
+		$.get("/api/motors/" + direction);
+	}
+
 	</script>
 </head>
 <body>
@@ -44,16 +50,16 @@
 			<table class="table text-center table-bordered">
 				<tr>
 					<td></td>
-					<td><button class="btn btn-lg btn-info"><i class="fa fa-arrow-up"></i></button></td>
+					<td><button class="btn btn-lg btn-info" onClick="move('forwards')"><i class="fa fa-arrow-up"></i></button></td>
 					<td></td>
 				</tr>
 				<tr>
-					<td><button class="btn btn-lg btn-info"><i class="fa fa-arrow-left"></i></button></td>
-					<td><button class="btn btn-lg btn-danger"><i class="fa fa-stop"></i></button></td>
-					<td><button class="btn btn-lg btn-info"><i class="fa fa-arrow-right"></i></button></td>
+					<td><button class="btn btn-lg btn-info" onClick="move('left')"><i class="fa fa-arrow-left"></i></button></td>
+					<td><button class="btn btn-lg btn-danger" onClick="move('stop')"><i class="fa fa-stop"></i></button></td>
+					<td><button class="btn btn-lg btn-info" onClick="move('right')"><i class="fa fa-arrow-right"></i></button></td>
 				</tr>
 				<td></td>
-				<td><button class="btn btn-lg btn-info"><i class="fa fa-arrow-down"></i></button></td>
+				<td><button class="btn btn-lg btn-info" onClick="move('reverse')"><i class="fa fa-arrow-down"></i></button></td>
 				<td></td>
 			</table>
 		</div>

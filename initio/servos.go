@@ -29,7 +29,6 @@ func StopServos() {
 
 // start the servos
 func StartServos() {
-	fmt.Println("Starting servos...")
 	err := startServod()
 
 	if err != nil {
@@ -47,8 +46,6 @@ func startServod() error {
 	// run the command ./servod --pcm --idle-timeout=20000 --p1pins="18,22"
 	cmd := exec.Command("sudo", "sh", "-c", "servod --pcm --idle-timeout=20000 --p1pins=\"18,22\"")
 	err := cmd.Run()
-
-	fmt.Println("Starting servod")
 
 	if err != nil {
 		fmt.Println(err)
