@@ -10,6 +10,26 @@
 			padding-top: 50px;
 		}
 	</style>
+
+
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript">
+	$(document).ready(function() {
+		// get the readings at an interval of 1s
+		setInterval(function() {
+			$.get("/api/sonar/distance", function(data) {
+				$("td#sonar").text(data + "cm");
+			});
+
+			$.getJSON("/api/ir", function(response) {
+				$("td#irleft").text(response.left);
+				$("td#irright").text(response.right);
+				$("td#irleftl").text(response.leftline);
+				$("td#irrightl").text(response.rightline);
+			})
+		}, 1000);
+	});
+	</script>
 </head>
 <body>
 
@@ -69,25 +89,25 @@
 
 				<tr>
 					<td>Ultrasound</td>
-					<td></td>
+					<td id="sonar"></td>
 				</tr>
 
 				<tr>
 					<td>IR Left</td>
-					<td></td>
+					<td id="irleft"></td>
 				</tr>
 				<tr>
 					<td>IR Right</td>
-					<td></td>
+					<td id="irright"></td>
 				</tr>
 
 				<tr>
 					<td>IR Line Left</td>
-					<td></td>
+					<td id="irleftl"></td>
 				</tr>
 				<tr>
 					<td>IR Line Right</td>
-					<td></td>
+					<td id="irrightl"></td>
 				</tr>
 			</table>
 		</div>

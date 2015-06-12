@@ -12,7 +12,10 @@ import (
 
 func Start() {
 	http.HandleFunc("/api/", apihandler)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { http.ServeFile(w, r, "static/"+r.URL.Path[1:]) }) // static files
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.URL.Path[1:])
+		http.ServeFile(w, r, "web/static/"+r.URL.Path[1:])
+	}) // static files
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -42,17 +45,31 @@ func sonar(s []string, w http.ResponseWriter, r *http.Request) {
 
 // JSON for the IR sensors
 type IRJSON struct {
-	Left      bool
-	Right     bool
-	LeftLine  bool
-	RightLine bool
+	Left      bool `json:"left"`
+	Right     bool `json:"right"`
+	LeftLine  bool `json:"leftline"`
+	RightLine bool `json:"rightline"`
 }
 
 // ir data
 func ir(s []string, w http.ResponseWriter, r *http.Request) {
-	if len(s) > 1 && s[1] == "distance" {
-		fmt.Fprintf(w, "%d\n", initio.GetDistance())
+	// instantiate the ir sensor
+	irSensor := initio.NewIR()
+
+	irs := &IRJSON{
+		Left:      irSensor.Left(),
+		Right:     irSensor.Right(),
+		LeftLine:  irSensor.LeftLine(),
+		RightLine: irSensor.RightLine(),
 	}
+
+	resp, err := json.MarshalIndent(irs, "", "  ")
+
+	if err != nil {
+		panic(err) // for now
+	}
+
+	fmt.Fprintf(w, "%s", resp)
 }
 
 // motors data

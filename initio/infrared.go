@@ -20,7 +20,7 @@ func NewIR() *IR {
 }
 
 // returns state of Left IR Obstacle sensor
-func (ir *IR) Left() bool {
+func (ir IR) Left() bool {
 	pin := rpio.Pin(irFrontLeft)
 	pin.Input()
 
@@ -28,7 +28,7 @@ func (ir *IR) Left() bool {
 }
 
 // returns state of Right IR Obstacle sensor
-func (ir *IR) Right() bool {
+func (ir IR) Right() bool {
 	pin := rpio.Pin(irFrontRight)
 	pin.Input()
 
@@ -36,12 +36,12 @@ func (ir *IR) Right() bool {
 }
 
 // returns true if any of the Obstacle sensors are triggered
-func (ir *IR) All() bool {
+func (ir IR) All() bool {
 	return ir.Right() || ir.Left()
 }
 
 // returns state of Left IR Line sensor
-func (ir *IR) LeftLine() bool {
+func (ir IR) LeftLine() bool {
 	pin := rpio.Pin(irLineLeft)
 	pin.Input()
 
@@ -49,7 +49,7 @@ func (ir *IR) LeftLine() bool {
 }
 
 // returns state of Right IR Line sensor
-func (ir *IR) RightLine() bool {
+func (ir IR) RightLine() bool {
 	pin := rpio.Pin(irLineRight)
 	pin.Input()
 
