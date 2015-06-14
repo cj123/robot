@@ -33,16 +33,21 @@ func getIndex(i int) int {
 	return i + 90
 }
 
+const (
+	PAN_STEP  = 10
+	TILT_STEP = 20
+)
+
 func MakeReadings() {
 
 	start := time.Now()
 	numReadings := 0
 
-	for i := -90; i < 90; i += 10 {
+	for i := -90; i < 90; i += PAN_STEP {
 		// move the servo pan position
 		initio.SetServo(initio.Pan, i)
 
-		for j := -60; j < 60; j += 20 {
+		for j := -60; j < 60; j += TILT_STEP {
 			dist := initio.GetDistance()
 
 			//fmt.Printf("(%d, %d) = %d\n", i, j, dist)
@@ -150,7 +155,7 @@ func getTimeForTurn(degrees int) time.Duration {
 	// ok, so it's nowhere near perfect, but i think it takes about
 	// 1 second for the robot to do a 90 degree turn
 	// so let's try this
-	return time.Duration(math.Abs(float64(20-degrees))) * (time.Second / 90)
+	return time.Duration(math.Abs(float64(initio.DEFAULT_VAL-degrees))) * (time.Second / 90)
 }
 
 const ROBOT_SPEED = 4 // cm/s
