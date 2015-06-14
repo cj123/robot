@@ -11,24 +11,26 @@ import (
 	"strings"
 )
 
-func Start(address string) {
+func Start(address string) bool {
 	http.HandleFunc("/api/", apihandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(r.URL.Path[1:])
 		http.ServeFile(w, r, "web/static/"+r.URL.Path[1:])
 	}) // static files
 	http.ListenAndServe(address, nil)
+
+	return true
 }
 
 var routes = map[string]func(s []string, w http.ResponseWriter, r *http.Request){
-	"sonar":  sonar,
-	"ir":     ir,
-	"motors": motors,
-	"servos": servos,
+	"sonar":     sonar,
+	"ir":        ir,
+	"motors":    motors,
+	"servos":    servos,
+	"collision": collision,
 }
 
 func apihandler(w http.ResponseWriter, r *http.Request) {
-
 	// get an array of parts of URL, as split by /
 	urlParts := strings.Split(r.URL.Path[len("/api/"):], "/")
 
@@ -126,4 +128,21 @@ func servos(s []string, w http.ResponseWriter, r *http.Request) {
 	} else if s[2] == "reset" {
 		initio.ResetServo(servo)
 	}
+}
+
+func collision(s []string, w http.ResponseWriter, r *http.Request) {
+	if len(s) < 2 {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+	}
+
+	if s[1] == "on" {
+		// start the avoidance system
+
+	}
+
+	if s[2] == "off" {
+		// stop the avoidance system
+
+	}
+
 }
