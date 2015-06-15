@@ -7,15 +7,18 @@ import (
 )
 
 const (
-	Pan  = 0
-	Tilt = 1
+	Pan         = 0
+	Tilt        = 1
 	DEFAULT_VAL = 20
 )
 
-var servosActive = false
+var (
+	// whether the servos are active
+	servosActive = false
 
-// the current servo value
-var servos [2]int
+	// the current servo value
+	servos [2]int
+)
 
 // set a servo to a certain angle
 func SetServo(servo int, degrees int) {

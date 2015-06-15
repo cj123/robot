@@ -3,8 +3,32 @@ package collisions
 import (
 	"fmt"
 	"github.com/cj123/robot/initio"
-	"math"
 	"time"
+)
+
+const (
+	// the directions
+	DIR_LEFT = iota
+	DIR_FRONT
+	DIR_RIGHT
+	DIR_UNKNOWN
+
+	// the increments for the servos
+	PAN_STEP  = 10
+	TILT_STEP = 20
+)
+
+var (
+	// the readings from the sensors at given tilt/pan angles
+	// as there are +90 -> -90 degrees on each centre, that gives 180*180
+	// possible readings. How quick these will happen, we don't know let's see
+	readings [180][180]int
+
+	// the average readings of each sensor pan location (averaged tilts)
+	averageReadings [180]int
+
+	// are we in motion?
+	inMotion bool
 )
 
 func init() {
@@ -19,24 +43,11 @@ func init() {
 	}
 }
 
-// the readings from the sensors at given tilt/pan angles
-// as there are +90 -> -90 degrees on each centre, that gives 180*180
-// possible readings. How quick these will happen, we don't know let's see
-var readings [180][180]int
-
-// the average readings of each sensor pan location (averaged tilts)
-var averageReadings [180]int
-
 // because we're using a 2D array, we need to adjust the index to be in the range
 // 0 < 180 rather than -90 < 90.
 func getIndex(i int) int {
 	return i + 90
 }
-
-const (
-	PAN_STEP  = 10
-	TILT_STEP = 20
-)
 
 func MakeReadings() {
 
@@ -83,9 +94,11 @@ func GetMaximumDistance() (maxKey int, maxVal int) {
 		MakeReadings()
 	}
 
+	// go through all the readings
 	for i := 0; i < len(readings); i++ {
 		sum := 0
 		numTaken := 0
+
 		for j := 0; j < len(readings[i]); j++ {
 			if readings[i][j] == -1 {
 				continue
@@ -96,7 +109,6 @@ func GetMaximumDistance() (maxKey int, maxVal int) {
 
 			// for the denominator
 			numTaken++
-
 		}
 
 		// avoid division by zero
@@ -121,103 +133,61 @@ func GetMaximumDistance() (maxKey int, maxVal int) {
 	return maxKey - 90, maxVal
 }
 
-// are we in motion?
-var inMotion bool
-
-const (
-	DIR_LEFT = iota
-	DIR_FRONT
-	DIR_RIGHT
-	DIR_UNKNOWN
-)
-
-var directionNames = [...]string{"left", "front", "right", "unknown :("}
-
-// given a servo point, get the general direction we should turn
-func GetDirection(servoPos int) int {
-	if servoPos < 35 && servoPos > 5 { // +/- 15 on the FRONT position (20)
-		return DIR_FRONT
-	} else if servoPos >= 35 {
-		return DIR_RIGHT
-	} else if servoPos <= 5 {
-		return DIR_LEFT
-	} else {
-		return DIR_UNKNOWN
-	}
-}
-
-func GetDirectionName(dir int) string {
-	return directionNames[dir]
-}
-
-// given a turn degree, ESTIMATE (for now) how long that will take to turn
-func getTimeForTurn(degrees int) time.Duration {
-	// ok, so it's nowhere near perfect, but i think it takes about
-	// 1 second for the robot to do a 90 degree turn
-	// so let's try this
-	return time.Duration(math.Abs(float64(initio.DEFAULT_VAL-degrees))) * (time.Second / 90)
-}
-
-const ROBOT_SPEED = 4 // cm/s
-
-// speed = distance / time
-// speed * time = distance
-// time = distance / speed
-func getTimeToMoveForwards(distance int) time.Duration {
-	// time = distance * speed
-	return time.Duration(distance/ROBOT_SPEED) * time.Second
-}
-
 func DoFunkyCollisionAvoidance() bool {
 
 	ir := initio.IR{}
 
 	for {
-
 		// check ir
 		if ir.Left() && ir.Right() {
 			// reverse
 			initio.Reverse(0)
-			time.Sleep(20 * time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 			initio.Stop()
 			continue
 		}
 
 		maxKey, maxVal := GetMaximumDistance()
-
-		direction := GetDirection(maxKey)
+		direction := getDirection(maxKey)
 
 		fmt.Printf("Maximum value: %d at key %d\n", maxVal, maxKey)
-		fmt.Printf("So we should probably turn %s\n", GetDirectionName(direction))
+		fmt.Printf("So we should probably turn %s\n", getDirectionName(direction))
 
 		fmt.Println("Moving servo to that position...")
 
 		initio.SetServo(initio.Pan, maxKey)
+
+		// set the servo height, because... OCD
 		initio.SetServo(initio.Tilt, initio.DEFAULT_VAL)
 
-		// maybe use a switch here
 		// find the turn degrees required to do it
-		if direction == DIR_FRONT {
+		switch direction {
+		case DIR_FRONT:
 			// go forwards
 			initio.Forward(0) // speed still needs implementing
+			inMotion = true
 			time.Sleep(getTimeToMoveForwards(maxVal))
-		} else if direction == DIR_LEFT {
+			break
+		case DIR_LEFT:
 			initio.SpinLeft(0)
 			t := getTimeForTurn(maxKey)
 			fmt.Println("I should turn for", t)
+			inMotion = true
 			time.Sleep(t)
-		} else if direction == DIR_RIGHT {
+			break
+		case DIR_RIGHT:
 			initio.SpinRight(0)
 			t := getTimeForTurn(maxKey)
 			fmt.Println("I should turn for", t)
+			inMotion = true
 			time.Sleep(t)
-		} else {
-			// uh we done fuckup
+			break
+		default:
 			fmt.Println("broken")
 		}
 
 		initio.Stop()
-
+		inMotion = false
 	}
 
 	return true

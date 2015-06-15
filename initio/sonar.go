@@ -5,11 +5,13 @@ import (
 	"time"
 )
 
-// the pin for the ultrasound sensor
-const sonar = 14
+const (
+	// the pin for the ultrasound sensor
+	sonar = 14
 
-// speed of sound (cm/s)
-const speedOfSound = 34000
+	// speed of sound (cm/s)
+	speedOfSound = 34000
+)
 
 // return the distance in cm to the nearest reflecting object
 // 0 == no object

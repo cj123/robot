@@ -15,6 +15,7 @@ const (
 	LeftMotor2 = 9  // 21
 )
 
+// the motor points
 var a, b, p, q rpio.Pin
 
 func init() {
