@@ -1,8 +1,8 @@
 package collisions
 
 import (
-	"fmt"
 	"github.com/cj123/robot/initio"
+	"log"
 	"math"
 	"time"
 )
@@ -45,9 +45,9 @@ func getTimeToMoveForwards(distance int) time.Duration {
 	// time = distance * speed
 	t := time.Duration(distance/ROBOT_SPEED) * time.Second
 
-	fmt.Println("My speed is", ROBOT_SPEED)
-	fmt.Println("The distance I read is", distance)
-	fmt.Println("I think i should move forward for", t)
+	log.Println("My speed is", ROBOT_SPEED)
+	log.Println("The distance I read is", distance)
+	log.Println("I think i should move forward for", t)
 
 	return t
 }

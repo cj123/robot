@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"github.com/cj123/robot/collisions"
+	//"github.com/cj123/robot/collisions"
 	"github.com/cj123/robot/web"
+	"log"
 )
 
 var address string
@@ -15,17 +15,18 @@ func init() {
 
 	flag.Parse()
 
-	fmt.Println("Robot initialised")
+	log.Println("Robot initialised")
 }
 
 func main() {
 
-	c := make(chan bool, 1)
+/*	c := make(chan bool, 1)
 
 	go func() {
-		c <- web.Start(address)
-	}()
+		c <- */web.Start(address)
+//	}()
 
-	collisions.DoFunkyCollisionAvoidance()
+	// start the collisions model
+	//collisions.Start()
 
 }

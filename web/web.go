@@ -28,6 +28,7 @@ var routes = map[string]func(s []string, w http.ResponseWriter, r *http.Request)
 	"motors":    motors,
 	"servos":    servos,
 	"collision": collision,
+	"domain":    getDomain,
 }
 
 func apihandler(w http.ResponseWriter, r *http.Request) {
@@ -145,4 +146,9 @@ func collision(s []string, w http.ResponseWriter, r *http.Request) {
 
 	}
 
+}
+
+// get the current domain
+func getDomain(s []string, w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "%s", r.Host)
 }

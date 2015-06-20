@@ -1,10 +1,12 @@
 package collisions
 
 import (
-	"fmt"
 	"github.com/cj123/robot/initio"
+	"log"
 	"time"
 )
+
+type Reading int
 
 const (
 	// the directions
@@ -13,9 +15,16 @@ const (
 	DIR_RIGHT
 	DIR_UNKNOWN
 
+	// type of reading
+	READING_QUICK Reading = iota
+	READING_FULL  Reading = iota
+
 	// the increments for the servos
 	PAN_STEP  = 10
 	TILT_STEP = 20
+
+	// an adjustment to take from the time calculated on a corner
+	CORNER_ADJUST = 25 * time.Millisecond
 )
 
 var (
@@ -29,9 +38,16 @@ var (
 
 	// are we in motion?
 	inMotion bool
+
+	takingMeasurements, foundCollision chan bool
 )
 
 func init() {
+	takingMeasurements = make(chan bool)
+	foundCollision = make(chan bool)
+
+	foundCollision <- false
+
 	inMotion = false
 
 	// make all reading values -1 to begin with
@@ -49,16 +65,28 @@ func getIndex(i int) int {
 	return i + 90
 }
 
-func MakeReadings() {
+// make readings, populating the readings
+func MakeReadings(readingType Reading) {
+
+	takingMeasurements <- true
+
+	// get the step values
+	panStep, tiltStep := PAN_STEP, TILT_STEP
+
+	// if it's a quick read, increase them
+	if readingType == READING_QUICK {
+		panStep *= 2
+		tiltStep *= 3
+	}
 
 	start := time.Now()
 	numReadings := 0
 
-	for i := -90; i < 90; i += PAN_STEP {
+	for i := -90; i < 90; i += panStep {
 		// move the servo pan position
 		initio.SetServo(initio.Pan, i)
 
-		for j := -60; j < 60; j += TILT_STEP {
+		for j := -60; j < 90; j += tiltStep {
 			dist := initio.GetDistance()
 
 			//fmt.Printf("(%d, %d) = %d\n", i, j, dist)
@@ -76,8 +104,10 @@ func MakeReadings() {
 
 	end := time.Now()
 
-	fmt.Printf("Total time taken: %fs\n", end.Sub(start).Seconds())
-	fmt.Printf("Number of readings: %d\n", numReadings)
+	log.Printf("Total time taken: %fs\n", end.Sub(start).Seconds())
+	log.Printf("Number of readings: %d\n", numReadings)
+
+	takingMeasurements <- false
 }
 
 // get the position for the maximum distance, as well as that distance
@@ -88,10 +118,10 @@ func GetMaximumDistance() (maxKey int, maxVal int) {
 	// if not in motion
 	if !inMotion {
 		// do quick readings
-		MakeReadings()
+		MakeReadings(READING_QUICK)
 	} else {
 		// do a full scan
-		MakeReadings()
+		MakeReadings(READING_FULL)
 	}
 
 	// go through all the readings
@@ -100,6 +130,7 @@ func GetMaximumDistance() (maxKey int, maxVal int) {
 		numTaken := 0
 
 		for j := 0; j < len(readings[i]); j++ {
+			// if it's set to not read here,
 			if readings[i][j] == -1 {
 				continue
 			}
@@ -133,28 +164,77 @@ func GetMaximumDistance() (maxKey int, maxVal int) {
 	return maxKey - 90, maxVal
 }
 
-func DoFunkyCollisionAvoidance() bool {
+// constantly recheck the IR sensors,
+func checkIR() {
 
 	ir := initio.IR{}
 
 	for {
+		time.Sleep(10 * time.Microsecond)
+
+		m := <-takingMeasurements
+
+		if m {
+			log.Println("Taking measurements...")
+			continue
+		}
+
+		log.Println("Checking for collisions")
+
 		// check ir
-		if ir.Left() && ir.Right() {
-			// reverse
+		if ir.Left() || ir.Right() {
+
+			log.Println("Found immediate collision. Stopping...")
+
+			foundCollision <- true
+
+			initio.Stop() // stop immediately
+
+			// reverse until the objects are gone
 			initio.Reverse(0)
-			time.Sleep(10 * time.Millisecond)
+
+			for ir.Left() || ir.Right() {
+				time.Sleep(10 * time.Microsecond)
+
+				// block any other actions until we're out of danger
+				initio.Reverse(0)
+			}
+
 			initio.Stop()
+
+			log.Println("Object moved, continuing...")
+
+			foundCollision <- false
+		}
+	}
+}
+
+// start collision avoidance
+func Start() bool {
+
+	go func() {
+		// start the IR sensor checking
+		checkIR()
+	}()
+
+	for {
+
+		// if we found a collision
+		if <-foundCollision {
+			log.Println("Collision found, no readings to be taken")
+			time.Sleep(10 * time.Millisecond)
 			continue
 		}
 
 		maxKey, maxVal := GetMaximumDistance()
 		direction := getDirection(maxKey)
 
-		fmt.Printf("Maximum value: %d at key %d\n", maxVal, maxKey)
-		fmt.Printf("So we should probably turn %s\n", getDirectionName(direction))
+		log.Printf("Maximum value: %d at key %d\n", maxVal, maxKey)
+		log.Printf("So we should probably turn %s\n", getDirectionName(direction))
 
-		fmt.Println("Moving servo to that position...")
+		log.Println("Moving servo to that position...")
 
+		// set the servo to the turn value
 		initio.SetServo(initio.Pan, maxKey)
 
 		// set the servo height, because... OCD
@@ -171,22 +251,36 @@ func DoFunkyCollisionAvoidance() bool {
 		case DIR_LEFT:
 			initio.SpinLeft(0)
 			t := getTimeForTurn(maxKey)
-			fmt.Println("I should turn for", t)
+			log.Println("I should turn for", t)
 			inMotion = true
 			time.Sleep(t)
+
+			initio.Forward(0) // then keep going
+
+			// get the time to move forward, but take a small amount off
+			// because of the corner we just turned
+			time.Sleep(getTimeToMoveForwards(maxVal) - CORNER_ADJUST)
 			break
 		case DIR_RIGHT:
 			initio.SpinRight(0)
 			t := getTimeForTurn(maxKey)
-			fmt.Println("I should turn for", t)
+			log.Println("I should turn for", t)
 			inMotion = true
 			time.Sleep(t)
+
+			initio.Forward(0) // then keep going
+
+			// get the time to move forward, but take a small amount off
+			// because of the corner we just turned
+			time.Sleep(getTimeToMoveForwards(maxVal) - CORNER_ADJUST)
 			break
 		default:
-			fmt.Println("broken")
+			log.Println("broken")
 		}
 
+		// stop moving
 		initio.Stop()
+
 		inMotion = false
 	}
 

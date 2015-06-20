@@ -5,7 +5,10 @@
 	<link rel="stylesheet" type="text/css" href="http://bootswatch.com/cyborg/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-	<style type="text/css">body { padding-top: 50px; }</style>
+	<style type="text/css">
+		body { padding-top: 50px; }
+		iframe.camera { width: 640px; height: 480px; padding: 1px; border: 1px solid #fff; margin-left: auto; margin-right: auto; }
+	</style>
 
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script type="text/javascript" src="/robot.js"></script>
@@ -99,12 +102,9 @@
 			</table>
 		</div>
 
-		<div class="col-md-12">
+		<div class="col-md-12 text-center">
 			<h3 class="text-center">Camera</h3>
-			<div style="height: 400px; background: #999; padding-top: 25%">
-
-				<h4 class="text-center">offline</h4>
-			</div>
+			<iframe class="camera" id="cameraFrame" onLoad="setupiFrame();">requires iframes</iframe>
 		</div>
 
 		<div class="clearfix"></div>

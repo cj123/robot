@@ -2,6 +2,7 @@ package initio
 
 import (
 	"github.com/stianeikeland/go-rpio"
+	"log"
 	"os"
 	"os/signal"
 )
@@ -26,8 +27,12 @@ func init() {
 	go func() {
 		for _ = range c {
 			// sig is a ^C, handle it
+			log.Println("^C detected, closing cleanly...")
+
 			Cleanup()
 			rpio.Close()
+
+			os.Exit(0)
 		}
 	}()
 }
