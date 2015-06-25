@@ -1,120 +1,181 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 	<title>DAVE 2.0 - Web Interface</title>
-	<link rel="stylesheet" type="text/css" href="http://bootswatch.com/cyborg/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+
 	<style type="text/css">
-		body { padding-top: 50px; }
-		iframe.camera { width: 640px; height: 480px; padding: 1px; border: 1px solid #fff; margin-left: auto; margin-right: auto; }
+		body { padding-top: 100px; }
+		img#cameraFrame {
+			padding: 1px;
+			border: 1px solid #fff;
+			margin-left: auto;
+			margin-right: auto;
+			background: #999;
+		}
+
+		table.control-table {
+			margin-top: 40px;
+		}
+
+		p.navbar-text {
+			color: #fff !important;
+		}
+
+		/* the IR sensor div! */
+		div.ir {
+			width: 20px;
+			height: 20px;
+			border-radius: 10px;
+			background: #700000;
+		}
+
+		div.ir.active {
+			background: #E00000;
+		}
 	</style>
 
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-	<script type="text/javascript" src="/robot.js"></script>
+	<script type="text/javascript" src="/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/robot.js"></script>
 </head>
 <body>
 
-<div class="container">
-	<div class="col-md-offset-2 col-md-8 well">
-		<h2 class="text-center"><i class="fa fa-2x fa-gamepad"></i><br>DAVE 2.0 Control Panel</h2>
-
-		<hr>
-
-		<div class="col-md-6">
-			<h3 class="text-center">Motors</h3>
-			<table class="table text-center table-bordered">
-				<tr>
-					<td></td>
-					<td><button class="btn btn-lg btn-info" onClick="move('forwards')"><i class="fa fa-arrow-up"></i></button></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td><button class="btn btn-lg btn-info" onClick="move('left')"><i class="fa fa-arrow-left"></i></button></td>
-					<td><button class="btn btn-lg btn-danger" onClick="move('stop')"><i class="fa fa-stop"></i></button></td>
-					<td><button class="btn btn-lg btn-info" onClick="move('right')"><i class="fa fa-arrow-right"></i></button></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td><button class="btn btn-lg btn-info" onClick="move('reverse')"><i class="fa fa-arrow-down"></i></button></td>
-					<td></td>
-				</tr>
-			</table>
+<nav class="navbar navbar-default navbar-fixed-top">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="/"><i class="fa fa-fw fa-gamepad"></i>&nbsp;&nbsp; DAVE 2.0</a>
 		</div>
+		<div id="navbar" class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li><a href="/">Home</a></li>
+				<li><a href="#">Log Output</a></li>
+			</ul>
 
-		<div class="col-md-6">
-			<h3 class="text-center">Servos</h3>
-			<table class="table text-center table-bordered">
-				<tr>
-					<td></td>
-					<td><button class="btn btn-lg btn-primary" onClick="incServo('tilt', +5)"><i class="fa fa-toggle-up"></i></button></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td><button class="btn btn-lg btn-primary" onClick="incServo('pan', -5)"><i class="fa fa-toggle-left"></i></button></td>
-					<td>
-						<small>(<span id="servo-pan"></span>, <span id="servo-tilt"></span>)</small><br>
-						<button class="btn btn-sm btn-warning" onClick="resetServos()">reset</button>
-					</td>
-					<td><button class="btn btn-lg btn-primary" onClick="incServo('pan', +5)"><i class="fa fa-toggle-right"></i></button></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td><button class="btn btn-lg btn-primary" onClick="incServo('tilt', -5)"><i class="fa fa-toggle-down"></i></button></td>
-					<td></td>
-				</tr>
-			</table>
+			<ul class="nav navbar-nav navbar-right">
+				<li><p class="navbar-text">Collision Avoidance</p></li>
+				<li>
+					<p class="navbar-btn">
+						<div class="btn-group">
+							<a class="btn btn-default" href="#" id="collisionAvoidanceOn" onClick="enableCollisionAvoidance();">on</a>
+							<a class="btn btn-default" href="#" id="collisionAvoidanceOff" onClick="disableCollisionAvoidance();">off</a>
+						</div>
+					</p>
+				</li>
+			</ul>
 		</div>
+	</div>
+</nav>
 
-		<div class="clearfix"></div>
+<div class="col-md-12">
 
-		<div class="col-md-12">
-			<h3 class="text-center">Readings</h3>
-			<table class="table text-center table-bordered table-striped">
-				<tr>
-					<th class="text-center">Sensor</th>
-					<th class="text-center">Value</th>
-				</tr>
+	<div class="panel panel-danger" id="crashPanel" style="display: none;"><div class="panel-heading"><h3 class="panel-title">Crash Detected</h3></div><div class="panel-body"></div></div>
 
-				<tr>
-					<td>Ultrasound</td>
-					<td id="sonar"></td>
-				</tr>
+	<div class="alert alert-danger" id="timeoutAlert" style="display: none;"></div>
 
-				<tr>
-					<td>IR Left</td>
-					<td id="irleft"></td>
-				</tr>
-				<tr>
-					<td>IR Right</td>
-					<td id="irright"></td>
-				</tr>
+	<div class="col-md-3 col-sm-2">
+		<h3 class="text-center">Motors</h3>
 
-				<tr>
-					<td>IR Line Left</td>
-					<td id="irleftl"></td>
-				</tr>
+		<table class="table text-center control-table">
+			<tr>
+				<td></td>
+				<td><button class="btn btn-lg btn-info" onClick="move('forwards')"><i class="fa fa-arrow-up"></i></button></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td><button class="btn btn-lg btn-info" onClick="move('left')"><i class="fa fa-arrow-left"></i></button></td>
+				<td><button class="btn btn-lg btn-danger" onClick="move('stop')"><i class="fa fa-stop"></i></button></td>
+				<td><button class="btn btn-lg btn-info" onClick="move('right')"><i class="fa fa-arrow-right"></i></button></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><button class="btn btn-lg btn-info" onClick="move('reverse')"><i class="fa fa-arrow-down"></i></button></td>
+				<td></td>
+			</tr>
+		</table>
 
-				<tr>
-					<td>IR Line Right</td>
-					<td id="irrightl"></td>
-				</tr>
-			</table>
-		</div>
+	</div>
 
-		<div class="col-md-12 text-center">
-			<h3 class="text-center">Camera</h3>
-			<iframe class="camera" id="cameraFrame" onLoad="setupiFrame();">requires iframes</iframe>
-		</div>
+	<div class="col-md-6 col-sm-8 text-center">
+		<img id="cameraFrame" class="img img-rounded img-responsive">
+		<br>
+		<table class="table text-center table-bordered table-striped">
+			<tr>
+				<th class="text-center">Sensor</th>
+				<th class="text-center">Value</th>
+			</tr>
 
-		<div class="clearfix"></div>
+			<tr>
+				<td>Ultrasound</td>
+				<td id="sonar"></td>
+			</tr>
+
+			<tr>
+				<td>IR Left</td>
+				<td id="irleft"></td>
+			</tr>
+
+			<tr>
+				<td>IR Right</td>
+				<td id="irright"></td>
+			</tr>
+
+			<tr>
+				<td>IR Line Left</td>
+				<td id="irleftl"></td>
+			</tr>
+
+			<tr>
+				<td>IR Line Right</td>
+				<td id="irrightl"></td>
+			</tr>
+		</table>
+	</div>
+
+	<div class="col-md-3 col-sm-2">
+		<h3 class="text-center">Servos</h3>
+
+		<div class="visible-md"><br><br></div>
+
+		<table class="table text-center control-table">
+			<tr>
+				<td></td>
+				<td><button class="btn btn-lg btn-primary" onClick="incServo('tilt', +5)"><i class="fa fa-toggle-up"></i></button></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td><button class="btn btn-lg btn-primary" onClick="incServo('pan', -5)"><i class="fa fa-toggle-left"></i></button></td>
+				<td>
+					<small>(<span id="servo-pan"></span>, <span id="servo-tilt"></span>)</small><br>
+					<button class="btn btn-sm btn-warning" onClick="resetServos()">reset</button>
+				</td>
+				<td><button class="btn btn-lg btn-primary" onClick="incServo('pan', +5)"><i class="fa fa-toggle-right"></i></button></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><button class="btn btn-lg btn-primary" onClick="incServo('tilt', -5)"><i class="fa fa-toggle-down"></i></button></td>
+				<td></td>
+			</tr>
+		</table>
 	</div>
 
 	<div class="clearfix"></div>
 
-	<div class="footer">
-		<p class="text-center">&copy; Callum Jones 2015</p>
-	</div>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="footer">
+	<p class="text-center">&copy; Callum Jones 2015</p>
 </div>
 </body>
 </html>

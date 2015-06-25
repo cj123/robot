@@ -39,15 +39,10 @@ var (
 	// are we in motion?
 	inMotion bool
 
-	takingMeasurements, foundCollision chan bool
+	takingMeasurements, foundCollision bool
 )
 
 func init() {
-	takingMeasurements = make(chan bool)
-	foundCollision = make(chan bool)
-
-	foundCollision <- false
-
 	inMotion = false
 
 	// make all reading values -1 to begin with
@@ -68,7 +63,7 @@ func getIndex(i int) int {
 // make readings, populating the readings
 func MakeReadings(readingType Reading) {
 
-	takingMeasurements <- true
+	takingMeasurements = true
 
 	// get the step values
 	panStep, tiltStep := PAN_STEP, TILT_STEP
@@ -107,7 +102,7 @@ func MakeReadings(readingType Reading) {
 	log.Printf("Total time taken: %fs\n", end.Sub(start).Seconds())
 	log.Printf("Number of readings: %d\n", numReadings)
 
-	takingMeasurements <- false
+	takingMeasurements = false
 }
 
 // get the position for the maximum distance, as well as that distance
@@ -172,9 +167,7 @@ func checkIR() {
 	for {
 		time.Sleep(10 * time.Microsecond)
 
-		m := <-takingMeasurements
-
-		if m {
+		if takingMeasurements {
 			log.Println("Taking measurements...")
 			continue
 		}
@@ -186,7 +179,7 @@ func checkIR() {
 
 			log.Println("Found immediate collision. Stopping...")
 
-			foundCollision <- true
+			foundCollision = true
 
 			initio.Stop() // stop immediately
 
@@ -204,23 +197,30 @@ func checkIR() {
 
 			log.Println("Object moved, continuing...")
 
-			foundCollision <- false
+			foundCollision = false
 		}
 	}
 }
 
 // start collision avoidance
-func Start() bool {
+func Start(run *bool) bool {
+
+	if *run {
+		log.Println("Starting collision avoidance...")
+	} else {
+		log.Println("Collision avoidance initialised, but disabled for now")
+	}
 
 	go func() {
+		foundCollision = false
+
 		// start the IR sensor checking
 		checkIR()
 	}()
 
 	for {
-
 		// if we found a collision
-		if <-foundCollision {
+		if foundCollision || !*run {
 			log.Println("Collision found, no readings to be taken")
 			time.Sleep(10 * time.Millisecond)
 			continue

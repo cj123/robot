@@ -6,12 +6,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cj123/robot/initio" // our robot commands
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
-func Start(address string) bool {
+var collisionAvoidance *bool
+
+func Start(address string, runCollisionAvoidance *bool) bool {
+
+	collisionAvoidance = runCollisionAvoidance
+
+	log.Println("Started webserver on " + address)
+
 	http.HandleFunc("/api/", apihandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(r.URL.Path[1:])
@@ -138,14 +146,17 @@ func collision(s []string, w http.ResponseWriter, r *http.Request) {
 
 	if s[1] == "on" {
 		// start the avoidance system
-
-	}
-
-	if s[2] == "off" {
+		*collisionAvoidance = true
+	} else if s[1] == "off" {
 		// stop the avoidance system
-
+		*collisionAvoidance = false
+	} else if s[1] == "get" {
+		fmt.Fprintf(w, "%t", *collisionAvoidance)
+	} else if s[1] == "toggle" {
+		*collisionAvoidance = !*collisionAvoidance
+	} else {
+		http.Error(w, "Invalid Request: "+s[1], http.StatusBadRequest)
 	}
-
 }
 
 // get the current domain
