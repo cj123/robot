@@ -40,9 +40,18 @@ var (
 	inMotion bool
 
 	takingMeasurements, foundCollision bool
+
+	motors *initio.Motors
+
+	panServo, tiltServo *initio.Servo
 )
 
 func init() {
+
+	motors = initio.NewMotor()
+	panServo = initio.NewServo(initio.Pan)
+	tiltServo = initio.NewServo(initio.Tilt)
+
 	inMotion = false
 
 	// make all reading values -1 to begin with
@@ -63,6 +72,9 @@ func getIndex(i int) int {
 // make readings, populating the readings
 func MakeReadings(readingType Reading) {
 
+	// sonar
+	sonar := initio.NewSonar()
+
 	takingMeasurements = true
 
 	// get the step values
@@ -79,10 +91,10 @@ func MakeReadings(readingType Reading) {
 
 	for i := -90; i < 90; i += panStep {
 		// move the servo pan position
-		initio.SetServo(initio.Pan, i)
+		tiltServo.Set(i)
 
 		for j := -60; j < 90; j += tiltStep {
-			dist := initio.GetDistance()
+			dist := sonar.GetDistance()
 
 			//fmt.Printf("(%d, %d) = %d\n", i, j, dist)
 
@@ -90,7 +102,7 @@ func MakeReadings(readingType Reading) {
 			readings[getIndex(i)][getIndex(j)] = dist
 
 			// move the servo tilt position
-			initio.SetServo(initio.Tilt, j)
+			panServo.Set(j)
 
 			time.Sleep(50 * time.Millisecond)
 			numReadings++
@@ -181,19 +193,19 @@ func checkIR() {
 
 			foundCollision = true
 
-			initio.Stop() // stop immediately
+			motors.Stop() // stop immediately
 
 			// reverse until the objects are gone
-			initio.Reverse(0)
+			motors.Reverse(0)
 
 			for ir.Left() || ir.Right() {
 				time.Sleep(10 * time.Microsecond)
 
 				// block any other actions until we're out of danger
-				initio.Reverse(0)
+				motors.Reverse(0)
 			}
 
-			initio.Stop()
+			motors.Stop()
 
 			log.Println("Object moved, continuing...")
 
@@ -235,40 +247,40 @@ func Start(run *bool) bool {
 		log.Println("Moving servo to that position...")
 
 		// set the servo to the turn value
-		initio.SetServo(initio.Pan, maxKey)
+		panServo.Set(maxKey)
 
 		// set the servo height, because... OCD
-		initio.SetServo(initio.Tilt, initio.DEFAULT_VAL)
+		tiltServo.Set(initio.DEFAULT_VAL)
 
 		// find the turn degrees required to do it
 		switch direction {
 		case DIR_FRONT:
 			// go forwards
-			initio.Forward(0) // speed still needs implementing
+			motors.Forward(0) // speed still needs implementing
 			inMotion = true
 			time.Sleep(getTimeToMoveForwards(maxVal))
 			break
 		case DIR_LEFT:
-			initio.SpinLeft(0)
+			motors.SpinLeft(0)
 			t := getTimeForTurn(maxKey)
 			log.Println("I should turn for", t)
 			inMotion = true
 			time.Sleep(t)
 
-			initio.Forward(0) // then keep going
+			motors.Forward(0) // then keep going
 
 			// get the time to move forward, but take a small amount off
 			// because of the corner we just turned
 			time.Sleep(getTimeToMoveForwards(maxVal) - CORNER_ADJUST)
 			break
 		case DIR_RIGHT:
-			initio.SpinRight(0)
+			motors.SpinRight(0)
 			t := getTimeForTurn(maxKey)
 			log.Println("I should turn for", t)
 			inMotion = true
 			time.Sleep(t)
 
-			initio.Forward(0) // then keep going
+			motors.Forward(0) // then keep going
 
 			// get the time to move forward, but take a small amount off
 			// because of the corner we just turned
@@ -279,7 +291,7 @@ func Start(run *bool) bool {
 		}
 
 		// stop moving
-		initio.Stop()
+		motors.Stop()
 
 		inMotion = false
 	}

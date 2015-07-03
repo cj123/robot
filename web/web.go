@@ -12,9 +12,19 @@ import (
 	"strings"
 )
 
-var collisionAvoidance *bool
+var (
+	collisionAvoidance  *bool
+	motor               *initio.Motors
+	sonarSensor         *initio.Sonar
+	panServo, tiltServo *initio.Servo
+)
 
 func Start(address string, runCollisionAvoidance *bool) bool {
+	motor = initio.NewMotor()
+	sonarSensor = initio.NewSonar()
+
+	panServo = initio.NewServo(initio.Pan)
+	tiltServo = initio.NewServo(initio.Tilt)
 
 	collisionAvoidance = runCollisionAvoidance
 
@@ -51,7 +61,7 @@ func apihandler(w http.ResponseWriter, r *http.Request) {
 // sonar data
 func sonar(s []string, w http.ResponseWriter, r *http.Request) {
 	if len(s) > 1 && s[1] == "distance" {
-		fmt.Fprintf(w, "%d\n", initio.GetDistance())
+		fmt.Fprintf(w, "%d\n", sonarSensor.GetDistance())
 	}
 }
 
@@ -91,15 +101,15 @@ func motors(s []string, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if s[1] == "forwards" {
-		initio.Forward(0) // speed TODO
+		motor.Forward(0) // speed TODO
 	} else if s[1] == "reverse" {
-		initio.Reverse(0)
+		motor.Reverse(0)
 	} else if s[1] == "left" {
-		initio.SpinLeft(0)
+		motor.SpinLeft(0)
 	} else if s[1] == "right" {
-		initio.SpinRight(0)
+		motor.SpinRight(0)
 	} else if s[1] == "stop" {
-		initio.Stop()
+		motor.Stop()
 	}
 }
 
@@ -109,13 +119,13 @@ func servos(s []string, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 	}
 
-	servo := -1
+	var servo *initio.Servo
 
 	// which servo are we using?
 	if s[1] == "pan" {
-		servo = initio.Pan
+		servo = panServo
 	} else if s[1] == "tilt" {
-		servo = initio.Tilt
+		servo = tiltServo
 	} else {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 	}
@@ -125,17 +135,17 @@ func servos(s []string, w http.ResponseWriter, r *http.Request) {
 		val, _ := strconv.Atoi(s[3])
 
 		// set the servo to this pos
-		initio.SetServo(servo, val)
+		servo.Set(val)
 	} else if s[2] == "inc" {
 		val, _ := strconv.Atoi(s[3])
 
 		// increment the servo
-		initio.IncServo(servo, val)
+		servo.Inc(val)
 	} else if s[2] == "get" {
 		// return servo pos
-		fmt.Fprintf(w, "%d", initio.GetServo(servo))
+		fmt.Fprintf(w, "%d", servo.Get())
 	} else if s[2] == "reset" {
-		initio.ResetServo(servo)
+		servo.Reset()
 	}
 }
 
