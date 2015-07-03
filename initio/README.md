@@ -1,5 +1,7 @@
 # initio.go
 
+[![GoDoc](https://godoc.org/github.com/cj123/robot/initio?status.svg)](https://godoc.org/github.com/cj123/robot/initio)
+
 the initio package (as provided [here](http://4tronix.co.uk/initio)), but rewritten in go
 
 **basic implementation, not yet complete.**
