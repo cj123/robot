@@ -20,31 +20,39 @@ var (
 	servos [2]int
 )
 
+type Servo struct {
+	Pin int // i.e. tilt or pan
+}
+
+func NewServo(pin int) *Servo {
+	return &Servo{Pin: pin}
+}
+
 // set a servo to a certain angle
-func SetServo(servo int, degrees int) {
+func (s *Servo) Set(degrees int) {
 	if !servosActive {
 		StartServos()
 	}
 
-	pinServod(servo, degrees)
-	servos[servo] = degrees
+	pinServod(s.Pin, degrees)
+	servos[s.Pin] = degrees
 }
 
 // get the current value the servo is at
-func GetServo(servo int) int {
-	return servos[servo]
+func (s *Servo) Get() int {
+	return servos[s.Pin]
 }
 
-func ResetServo(servo int) {
-	SetServo(servo, DEFAULT_VAL)
+func (s *Servo) Reset() {
+	s.Set(DEFAULT_VAL)
 }
 
 // increment (or decrement) a servo by a value
-func IncServo(servo int, increment int) {
-	val := GetServo(servo)
+func (s *Servo) Inc(increment int) {
+	val := s.Get()
 	val += increment
 
-	SetServo(servo, val)
+	s.Set(val)
 }
 
 // stop the servos

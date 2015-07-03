@@ -7,8 +7,10 @@ import (
 )
 
 func TestGetDistance(t *testing.T) {
+	s := NewSonar()
+
 	for i := 0; i < 10; i++ {
-		fmt.Printf("Distance: %dcm\n", GetDistance())
+		fmt.Printf("Distance: %dcm\n", s.GetDistance())
 		time.Sleep(2 * time.Second)
 	}
 

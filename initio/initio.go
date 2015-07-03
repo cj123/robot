@@ -17,9 +17,13 @@ func init() {
 	// setup the servos
 	StartServos()
 
+	// initialise the two
+	pan := NewServo(Pan)
+	tilt := NewServo(Tilt)
+
 	// set them to known values
-	SetServo(Tilt, DEFAULT_VAL)
-	SetServo(Pan, DEFAULT_VAL)
+	pan.Set(DEFAULT_VAL)
+	tilt.Set(DEFAULT_VAL)
 
 	// catch ^C, and cleanup appropriately
 	c := make(chan os.Signal, 1)
@@ -39,7 +43,9 @@ func init() {
 }
 
 func Cleanup() {
-	Stop()       // stop motors
+	// we can open a new instance of motor - they're the same pins
+	m := NewMotor()
+	m.Stop()     // stop motors
 	StopServos() // stop servos
 	//	rpio.Close()
 }

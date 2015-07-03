@@ -15,95 +15,101 @@ const (
 	LeftMotor2 = 9  // 21
 )
 
-// the motor points
-var a, b, p, q rpio.Pin
+type Motors struct {
+	// the motor points
+	a, b, p, q rpio.Pin
+}
 
-func init() {
+func NewMotor() *Motors {
+	m := Motors{}
+
 	// initialise the pins
-	p = rpio.Pin(LeftMotor1)
-	p.Output()
+	m.p = rpio.Pin(LeftMotor1)
+	m.p.Output()
 
-	q = rpio.Pin(LeftMotor2)
-	q.Output()
+	m.q = rpio.Pin(LeftMotor2)
+	m.q.Output()
 
-	a = rpio.Pin(RightMotor1)
-	a.Output()
+	m.a = rpio.Pin(RightMotor1)
+	m.a.Output()
 
-	b = rpio.Pin(RightMotor2)
-	b.Output()
+	m.b = rpio.Pin(RightMotor2)
+	m.b.Output()
+
+	return &m
 }
 
 // stop both motors
-func Stop() {
-	p.Low()
-	q.Low()
+func (m Motors) Stop() {
+	m.p.Low()
+	m.q.Low()
 
-	a.Low()
-	b.Low()
+	m.a.Low()
+	m.b.Low()
 }
 
 // move forward at speed, 0 <= speed <= 100
-func Forward(speed uint8) {
+func (m Motors) Forward(speed uint8) {
 	if speed > 100 || speed < 0 {
 		fmt.Println("speed out of range")
 		return
 	}
 
-	p.High()
-	q.Low()
+	m.p.High()
+	m.q.Low()
 
-	a.High()
-	b.Low()
+	m.a.High()
+	m.b.Low()
 }
 
 // move backwards at speed, 0 <= speed <= 100
-func Reverse(speed uint8) {
+func (m Motors) Reverse(speed uint8) {
 	if speed > 100 || speed < 0 {
 		fmt.Println("speed out of range")
 		return
 	}
 
-	p.Low()
-	q.High()
+	m.p.Low()
+	m.q.High()
 
-	a.Low()
-	b.High()
+	m.a.Low()
+	m.b.High()
 }
 
 // spin left (sets motors to turn at opposite directions at speed)
 // 0 <= speed <= 100
-func SpinLeft(speed uint8) {
+func (m Motors) SpinLeft(speed uint8) {
 	if speed > 100 || speed < 0 {
 		fmt.Println("speed out of range")
 		return
 	}
 
-	p.High()
-	q.Low()
+	m.p.High()
+	m.q.Low()
 
-	a.Low()
-	b.High()
+	m.a.Low()
+	m.b.High()
 }
 
 // spin left (sets motors to turn at opposite directions at speed)
 // 0 <= speed <= 100
-func SpinRight(speed uint8) {
+func (m Motors) SpinRight(speed uint8) {
 	if speed > 100 || speed < 0 {
 		fmt.Println("speed out of range")
 		return
 	}
 
-	p.Low()
-	q.High()
+	m.p.Low()
+	m.q.High()
 
-	a.High()
-	b.Low()
+	m.a.High()
+	m.b.Low()
 }
 
 // TODO:
 //  moves forwards in an arc by setting different speeds
 // 0 <= leftSpeed,rightSpeed <= 100
-func TurnForward(leftSpeed uint8, rightSpeed uint8) {
+func (m Motors) TurnForward(leftSpeed uint8, rightSpeed uint8) {
 	if leftSpeed > 100 || leftSpeed < 0 || rightSpeed > 100 || rightSpeed < 0 {
 		fmt.Println("speed out of range")
 		return
@@ -114,7 +120,7 @@ func TurnForward(leftSpeed uint8, rightSpeed uint8) {
 // TODO:
 // moves backwards in an arc by setting different speeds
 // 0 <= leftSpeed,rightSpeed <= 100
-func TurnReverse(leftSpeed uint8, rightSpeed uint8) {
+func (m Motors) TurnReverse(leftSpeed uint8, rightSpeed uint8) {
 	if leftSpeed > 100 || leftSpeed < 0 || rightSpeed > 100 || rightSpeed < 0 {
 		fmt.Println("speed out of range")
 		return

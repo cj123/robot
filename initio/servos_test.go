@@ -6,19 +6,23 @@ import (
 )
 
 func TestServos(t *testing.T) {
+
+	panServo := NewServo(Pan)
+	tiltServo := NewServo(tilt)
+
 	// move them around a bit
-	SetServo(Pan, 10)
+	panServo.Set(10)
 	time.Sleep(5 * time.Second)
-	SetServo(Pan, 20)
+	panServo.Set(20)
 	time.Sleep(5 * time.Second)
-	SetServo(Pan, -20)
+	panServo.Set(-20)
 
 	time.Sleep(5 * time.Second)
-	SetServo(Tilt, 10)
+	tiltServo.Set(10)
 	time.Sleep(5 * time.Second)
-	SetServo(Tilt, 20)
+	tiltServo.Set(20)
 	time.Sleep(5 * time.Second)
-	SetServo(Tilt, -20)
+	tiltServo.Set(-20)
 
 	Cleanup()
 }

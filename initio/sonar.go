@@ -13,9 +13,15 @@ const (
 	speedOfSound = 34000
 )
 
+type Sonar struct{}
+
+func NewSonar() *Sonar {
+	return &Sonar{}
+}
+
 // return the distance in cm to the nearest reflecting object
 // 0 == no object
-func GetDistance() int {
+func (s Sonar) GetDistance() int {
 	// setup sonar to be output
 	pin := rpio.Pin(sonar)
 	pin.Output()
