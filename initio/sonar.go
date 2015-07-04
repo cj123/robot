@@ -7,7 +7,7 @@ import (
 
 const (
 	// the pin for the ultrasound sensor
-	sonar = 14
+	sonarPin = 14
 
 	// speed of sound (cm/s)
 	speedOfSound = 34000
@@ -23,7 +23,7 @@ func NewSonar() *Sonar {
 // 0 == no object
 func (s Sonar) GetDistance() int {
 	// setup sonar to be output
-	pin := rpio.Pin(sonar)
+	pin := rpio.Pin(sonarPin)
 	pin.Output()
 
 	// output a 10us pulse

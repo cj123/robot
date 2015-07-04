@@ -10,8 +10,8 @@ type IR struct{}
 const (
 	irFrontLeft  = 4  // 7 but using the mapping from go-rpio
 	irFrontRight = 17 // 11
-	irBackLeft   = 0  // !! TODO
-	irBackRight  = 0  // !! TODO
+	irBackLeft   = 23 // !! TODO
+	irBackRight  = 22 // !! TODO
 	irLineLeft   = 18 // 12
 	irLineRight  = 21 // 13
 )

@@ -15,13 +15,11 @@ const (
 var (
 	// whether the servos are active
 	servosActive = false
-
-	// the current servo value
-	servos [2]int
 )
 
 type Servo struct {
-	Pin int // i.e. tilt or pan
+	Pin     int // i.e. tilt or pan
+	Current int // the current position
 }
 
 func NewServo(pin int) *Servo {
@@ -35,12 +33,12 @@ func (s *Servo) Set(degrees int) {
 	}
 
 	pinServod(s.Pin, degrees)
-	servos[s.Pin] = degrees
+	s.Current = degrees
 }
 
 // get the current value the servo is at
 func (s *Servo) Get() int {
-	return servos[s.Pin]
+	return s.Current
 }
 
 func (s *Servo) Reset() {
