@@ -91,7 +91,7 @@ func MakeReadings(readingType Reading) {
 
 	for i := -90; i < 90; i += panStep {
 		// move the servo pan position
-		tiltServo.Set(i)
+		panServo.Set(i)
 
 		for j := -60; j < 90; j += tiltStep {
 			dist := sonar.GetDistance()
@@ -102,7 +102,7 @@ func MakeReadings(readingType Reading) {
 			readings[getIndex(i)][getIndex(j)] = dist
 
 			// move the servo tilt position
-			panServo.Set(j)
+			tiltServo.Set(j)
 
 			time.Sleep(50 * time.Millisecond)
 			numReadings++
@@ -184,8 +184,6 @@ func checkIR() {
 			continue
 		}
 
-		log.Println("Checking for collisions")
-
 		// check ir
 		if ir.Left() || ir.Right() {
 
@@ -211,6 +209,30 @@ func checkIR() {
 
 			foundCollision = false
 		}
+
+		if ir.BackLeft() || ir.BackRight() {
+			log.Println("Found collision behind robot. Stopping...")
+
+			foundCollision = true
+
+			motors.Stop() // stop now
+
+			// move forward until obstacle is gone
+			motors.Forward(0)
+
+			for ir.BackLeft() || ir.BackRight() {
+				time.Sleep(10 * time.Microsecond)
+
+				// block other actions
+				motors.Forward(0)
+			}
+
+			motors.Stop()
+
+			log.Println("Lost object, continuing...")
+
+			foundCollision = false
+		}
 	}
 }
 
@@ -233,7 +255,6 @@ func Start(run *bool) bool {
 	for {
 		// if we found a collision
 		if foundCollision || !*run {
-			log.Println("Collision found, no readings to be taken")
 			time.Sleep(10 * time.Millisecond)
 			continue
 		}
