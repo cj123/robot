@@ -10,7 +10,7 @@ const (
 	sonarPin = 14
 
 	// speed of sound (cm/s)
-	speedOfSound = 34000
+	speedOfSound = 34029
 )
 
 type Sonar struct{}
