@@ -31,24 +31,27 @@ $(document).ready(function() {
 
 		$.getJSON("/api/ir", function(response) {
 
-			if (response.length == 0) {
-				// error, we timed out
-				$("#timeoutAlert").text("Error! It looks like we timed out from the robot API... :(");
-				$("#timeoutAlert").show();
-			}
-
 			crashTime++
 
-			/*if (response.left || response.right) {
+			if (response.frontleft || response.frontright || response.backleft || response.backright) {
 				//move('stop'); // prevent a collision
 				crashTime = 0;
 				$("#crashPanel .panel-body").text(++crashCount + ": A crash was detected. We stopped you from breaking anything!");
 				$("#crashPanel").show();
-			} else if(crashTime == 5) {
+			} else if(crashTime == 50) {
 				$("#crashPanel").hide();
-			}*/
+			}
+		}).fail(function() {
+			// error, we timed out
+			$("#timeoutAlert").show();
 		});
-	}, 200);
+
+		// update log panel
+		$.get("/log", function(data) {
+			$("#logOutput").text(data);
+			tailScroll();
+		});
+	}, 100);
 
 	// get the readings at an interval of 1s
 	setInterval(function() {
@@ -61,8 +64,10 @@ $(document).ready(function() {
 
 		// infrared readings
 		$.getJSON("/api/ir", function(response) {
-			$("td#irleft").text(response.left);
-			$("td#irright").text(response.right);
+			$("td#irleft").text(response.frontleft);
+			$("td#irright").text(response.frontright);
+			$("td#irbleft").text(response.backleft);
+			$("td#irbright").text(response.backright);
 			$("td#irleftl").text(response.leftline);
 			$("td#irrightl").text(response.rightline);
 		});
@@ -99,6 +104,8 @@ function getCollisionAvoidance() {
 	}).complete(function() {
 		return enabled === "true";
 	});
+
+	return enabled;
 }
 
 function move(direction) {
@@ -163,3 +170,11 @@ $(document).keydown(function(e) {
 
 	e.preventDefault(); // prevent the default action (scroll / move caret)
 });
+
+// keep at the bottom of the div
+function tailScroll() {
+    var height = $("#logOutput").get(0).scrollHeight;
+    $("#logOutput").animate({
+        scrollTop: height
+    }, 500);
+}

@@ -36,6 +36,12 @@
 		div.ir.active {
 			background: #E00000;
 		}
+
+		div#logOutput {
+			white-space: pre;
+			max-height: 300px;
+			overflow-y: scroll;
+		}
 	</style>
 
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
@@ -58,7 +64,7 @@
 			<div id="navbar" class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
 					<li><a href="/">Home</a></li>
-					<li><a href="#">Log Output</a></li>
+					<li><a href="#logOutput">Log Output</a></li>
 				</ul>
 
 				<ul class="nav navbar-nav navbar-right">
@@ -78,9 +84,15 @@
 
 	<div class="col-md-12">
 
-		<div class="panel panel-danger" id="crashPanel" style="display: none;"><div class="panel-heading"><h3 class="panel-title">Crash Detected</h3></div><div class="panel-body"></div></div>
+		<!-- warning alerts, panels -->
+		<div class="col-md-6 col-md-offset-3">
+			<div class="panel panel-danger" id="crashPanel" style="display: none;"><div class="panel-heading"><h3 class="panel-title">Crash Detected</h3></div><div class="panel-body"></div></div>
 
-		<div class="alert alert-danger" id="timeoutAlert" style="display: none;"></div>
+			<div class="alert alert-danger" id="timeoutAlert" style="display: none;"><i class="fa fa-exclamation-triangle fa-2x fa-fw"></i> Error! It looks like we timed out from the robot API... :(</div>
+		</div>
+		<div class="clearfix"></div>
+
+
 
 		<div class="col-md-3 col-sm-2">
 			<h3 class="text-center">Motors</h3>
@@ -130,6 +142,16 @@
 				</tr>
 
 				<tr>
+					<td>IR Reverse Left</td>
+					<td id="irbleft"></td>
+				</tr>
+
+				<tr>
+					<td>IR Reverse Right</td>
+					<td id="irbright"></td>
+				</tr>
+
+				<tr>
 					<td>IR Line Left</td>
 					<td id="irleftl"></td>
 				</tr>
@@ -170,6 +192,13 @@
 
 		<div class="clearfix"></div>
 
+		<div class="col-md-6 col-md-offset-3">
+			<h3 class="text-center">Log Output</h3>
+
+			<div class="well well-lg" id="logOutput"></div>
+		</div>
+
+		<div class="clearfix"></div>
 	</div>
 
 	<div class="clearfix"></div>

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"bytes"
 )
 
 var (
@@ -17,9 +18,12 @@ var (
 	motor               *initio.Motors
 	sonarSensor         *initio.Sonar
 	panServo, tiltServo *initio.Servo
+	logBuffer *bytes.Buffer
 )
 
-func Start(address string, runCollisionAvoidance *bool) bool {
+func Start(address string, runCollisionAvoidance *bool, buf *bytes.Buffer) bool {
+
+	logBuffer = buf
 	motor = initio.NewMotor()
 	sonarSensor = initio.NewSonar()
 
@@ -31,10 +35,16 @@ func Start(address string, runCollisionAvoidance *bool) bool {
 	log.Println("Started webserver on " + address)
 
 	http.HandleFunc("/api/", apihandler)
+
+	http.HandleFunc("/log", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "%s", logBuffer)
+	})
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(r.URL.Path[1:])
 		http.ServeFile(w, r, "web/static/"+r.URL.Path[1:])
 	}) // static files
+
 	http.ListenAndServe(address, nil)
 
 	return true
@@ -67,10 +77,12 @@ func sonar(s []string, w http.ResponseWriter, r *http.Request) {
 
 // JSON for the IR sensors
 type IRJSON struct {
-	Left      bool `json:"left"`
-	Right     bool `json:"right"`
-	LeftLine  bool `json:"leftline"`
-	RightLine bool `json:"rightline"`
+	FrontLeft  bool `json:"frontleft"`
+	FrontRight bool `json:"frontright"`
+	BackLeft   bool `json:"backleft"`
+	BackRight  bool `json:"backright"`
+	LeftLine   bool `json:"leftline"`
+	RightLine  bool `json:"rightline"`
 }
 
 // ir data
@@ -79,10 +91,12 @@ func ir(s []string, w http.ResponseWriter, r *http.Request) {
 	irSensor := initio.NewIR()
 
 	irs := &IRJSON{
-		Left:      irSensor.Left(),
-		Right:     irSensor.Right(),
-		LeftLine:  irSensor.LeftLine(),
-		RightLine: irSensor.RightLine(),
+		FrontLeft:  irSensor.Left(),
+		FrontRight: irSensor.Right(),
+		BackLeft:   irSensor.BackLeft(),
+		BackRight:  irSensor.BackRight(),
+		LeftLine:   irSensor.LeftLine(),
+		RightLine:  irSensor.RightLine(),
 	}
 
 	resp, err := json.MarshalIndent(irs, "", "  ")
