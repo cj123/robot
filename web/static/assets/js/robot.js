@@ -109,7 +109,8 @@ function getCollisionAvoidance() {
 }
 
 function move(direction) {
-	$.get("/api/motors/" + direction);
+	var speed = $("#speedControl").val();
+	$.get("/api/motors/" + direction + "/" + speed);
 }
 
 function incServo(name, val) {

@@ -2,8 +2,6 @@ package initio
 
 import (
 	"fmt"
-
-	"github.com/stianeikeland/go-rpio"
 )
 
 const (
@@ -16,23 +14,23 @@ const (
 
 type Motors struct {
 	// the motor points
-	a, b, p, q rpio.Pin
+	a, b, p, q *PWMPin
 }
 
 func NewMotor() *Motors {
 	m := Motors{}
 
 	// initialise the pins
-	m.p = rpio.Pin(LeftMotor1)
+	m.p = NewPWMPin(LeftMotor1)
 	m.p.Output()
 
-	m.q = rpio.Pin(LeftMotor2)
+	m.q = NewPWMPin(LeftMotor2)
 	m.q.Output()
 
-	m.a = rpio.Pin(RightMotor1)
+	m.a = NewPWMPin(RightMotor1)
 	m.a.Output()
 
-	m.b = rpio.Pin(RightMotor2)
+	m.b = NewPWMPin(RightMotor2)
 	m.b.Output()
 
 	return &m
@@ -54,10 +52,10 @@ func (m Motors) Forward(speed uint8) {
 		return
 	}
 
-	m.p.High()
+	m.p.pwm(speed)
 	m.q.Low()
 
-	m.a.High()
+	m.a.pwm(speed)
 	m.b.Low()
 }
 
@@ -69,10 +67,10 @@ func (m Motors) Reverse(speed uint8) {
 	}
 
 	m.p.Low()
-	m.q.High()
+	m.q.pwm(speed)
 
 	m.a.Low()
-	m.b.High()
+	m.b.pwm(speed)
 }
 
 // spin left (sets motors to turn at opposite directions at speed)
@@ -83,11 +81,11 @@ func (m Motors) SpinLeft(speed uint8) {
 		return
 	}
 
-	m.p.High()
+	m.p.pwm(speed)
 	m.q.Low()
 
 	m.a.Low()
-	m.b.High()
+	m.b.pwm(speed)
 }
 
 // spin left (sets motors to turn at opposite directions at speed)
@@ -99,9 +97,9 @@ func (m Motors) SpinRight(speed uint8) {
 	}
 
 	m.p.Low()
-	m.q.High()
+	m.q.pwm(speed)
 
-	m.a.High()
+	m.a.pwm(speed)
 	m.b.Low()
 }
 

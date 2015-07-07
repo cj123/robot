@@ -114,14 +114,24 @@ func motors(s []string, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 	}
 
+	var speed uint8
+
+	// if a speed parameter was passed use it
+	if len(s) == 3 {
+		parsedSpeed, _ := strconv.ParseUint(s[2], 10, 8)
+		speed = uint8(parsedSpeed)
+	} else {
+		speed = 50
+	}
+
 	if s[1] == "forwards" {
-		motor.Forward(0) // speed TODO
+		motor.Forward(speed) // speed TODO
 	} else if s[1] == "reverse" {
-		motor.Reverse(0)
+		motor.Reverse(speed)
 	} else if s[1] == "left" {
-		motor.SpinLeft(0)
+		motor.SpinLeft(speed)
 	} else if s[1] == "right" {
-		motor.SpinRight(0)
+		motor.SpinRight(speed)
 	} else if s[1] == "stop" {
 		motor.Stop()
 	}
