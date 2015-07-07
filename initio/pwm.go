@@ -5,7 +5,7 @@ package initio
 // (specifically https://github.com/WiringPi/WiringPi/blob/master/wiringPi/softPwm.c)
 
 import (
-    "time"
+	"time"
 	"github.com/stianeikeland/go-rpio"
 )
 
@@ -24,7 +24,7 @@ func NewPWMPin(pin int) *PWMPin{
 // software pwm on the motors, laziness rules all
 func (p *PWMPin) pwm(speed uint8) {
 
-    p.Output()
+	p.Output()
 
 	if !p.active {
 		p.active = true
