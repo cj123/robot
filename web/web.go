@@ -3,6 +3,7 @@ package web
 // provides a way of controlling/reading the sensors over the web
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/cj123/robot/initio" // our robot commands
@@ -10,7 +11,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"bytes"
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 	motor               *initio.Motors
 	sonarSensor         *initio.Sonar
 	panServo, tiltServo *initio.Servo
-	logBuffer *bytes.Buffer
+	logBuffer           *bytes.Buffer
 )
 
 func Start(address string, runCollisionAvoidance *bool, buf *bytes.Buffer) bool {

@@ -15,7 +15,7 @@ $(document).ready(function() {
 
 	setInterval(function() {
 
-		if(getCollisionAvoidance() == true) {
+		if(getCollisionAvoidance()) {
 			$("#collisionAvoidanceOn").removeClass("btn-default");
 			$("#collisionAvoidanceOff").removeClass("btn-success");
 
@@ -49,7 +49,7 @@ $(document).ready(function() {
 		// update log panel
 		$.get("/log", function(data) {
 			$("#logOutput").text(data);
-			tailScroll();
+			///tailScroll();
 		});
 	}, 100);
 

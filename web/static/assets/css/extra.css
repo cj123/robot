@@ -1,0 +1,43 @@
+/**
+ * Extra CSS Modifications for Bootstrap
+ * (c) 2015 Callum Jones
+ * See attached LICENSE file
+ */
+
+body {
+    padding-top: 100px;
+}
+
+img#cameraFrame {
+    padding: 1px;
+    border: 1px solid #fff;
+    margin-left: auto;
+    margin-right: auto;
+    background: #999;
+}
+
+table.control-table {
+    margin-top: 40px;
+}
+
+p.navbar-text {
+    color: #fff !important;
+}
+
+/* the IR sensor div! */
+div.ir {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: #700000;
+}
+
+div.ir.active {
+    background: #E00000;
+}
+
+div#logOutput {
+    white-space: pre;
+    max-height: 300px;
+    overflow-y: scroll;
+}

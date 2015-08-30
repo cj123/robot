@@ -180,7 +180,7 @@ func checkIR() {
 		time.Sleep(10 * time.Microsecond)
 
 		if takingMeasurements {
-			log.Println("Taking measurements...")
+			//log.Println("Taking measurements...")
 			continue
 		}
 

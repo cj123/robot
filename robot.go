@@ -1,26 +1,34 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"github.com/cj123/robot/collisions"
+	"github.com/cj123/robot/initio"
 	"github.com/cj123/robot/web"
-	"log"
-	"bytes"
-	"os"
 	"io"
+	"log"
+	"os"
 )
 
-// address of web interface
-var address string
+var (
+	// address of web interface
+	address string
 
-// whether we should run collision avoidance
-var runCollisionAvoidance bool
+	// remote API address
+	remoteAddr string
 
-var buf *bytes.Buffer
+	// whether we should run collision avoidance
+	runCollisionAvoidance bool
+
+	// output for logging
+	buf *bytes.Buffer
+)
 
 func init() {
 	// parse the flags
 	flag.StringVar(&address, "a", "0.0.0.0:80", "the address on which to run robot's web interface")
+	flag.StringVar(&remoteAddr, "r", "127.0.0.1:80", "the remote address on which the robot API is running")
 	flag.BoolVar(&runCollisionAvoidance, "c", false, "should we try avoid collisions?")
 	flag.Parse()
 
@@ -38,6 +46,8 @@ func main() {
 	go func() {
 		c <- web.Start(address, &runCollisionAvoidance, buf)
 	}()
+
+	initio.SetBaseURL(remoteAddr)
 
 	// start the collisions model
 	collisions.Start(&runCollisionAvoidance)
