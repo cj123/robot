@@ -6,8 +6,9 @@ import (
 )
 
 const interval = time.Second
+const testSpeed = 100
 
-var m *Motor
+var m *Motors
 
 func init() {
 	m = NewMotor()
@@ -17,7 +18,7 @@ func TestForwards(t *testing.T) {
 	t.Log("Testing forwards")
 
 	for i := 0; i < 3; i++ {
-		m.Forward(0)
+		m.Forward(testSpeed)
 		time.Sleep(interval)
 
 		m.Stop()
@@ -31,7 +32,7 @@ func TestReverse(t *testing.T) {
 	t.Log("Testing reverse")
 
 	for i := 0; i < 3; i++ {
-		m.Reverse(0)
+		m.Reverse(testSpeed)
 		time.Sleep(interval)
 
 		m.Stop()
@@ -45,7 +46,7 @@ func TestRight(t *testing.T) {
 	t.Log("Testing right")
 
 	for i := 0; i < 3; i++ {
-		m.SpinRight(0)
+		m.SpinRight(testSpeed)
 		time.Sleep(interval)
 
 		m.Stop()
@@ -59,7 +60,7 @@ func TestLeft(t *testing.T) {
 	t.Log("Testing left")
 
 	for i := 0; i < 3; i++ {
-		m.SpinLeft(0)
+		m.SpinLeft(testSpeed)
 		time.Sleep(interval)
 
 		m.Stop()

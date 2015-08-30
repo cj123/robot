@@ -5,8 +5,8 @@ package initio
 // (specifically https://github.com/WiringPi/WiringPi/blob/master/wiringPi/softPwm.c)
 
 import (
-	"time"
 	"github.com/stianeikeland/go-rpio"
+	"time"
 )
 
 // a gpio pin, with added pwm
@@ -17,7 +17,7 @@ type PWMPin struct {
 
 const RANGE = 100
 
-func NewPWMPin(pin int) *PWMPin{
+func NewPWMPin(pin int) *PWMPin {
 	return &PWMPin{rpio.Pin(pin), false}
 }
 
@@ -35,11 +35,11 @@ func (p *PWMPin) pwm(speed uint8) {
 
 			p.High()
 
-			time.Sleep(time.Duration(speed * 100) * time.Microsecond)
+			time.Sleep(time.Duration(speed*100) * time.Microsecond)
 
 			p.Pin.Low()
 
-			time.Sleep(time.Duration((RANGE - speed) * 100) * time.Microsecond)
+			time.Sleep(time.Duration((RANGE-speed)*100) * time.Microsecond)
 		}
 	}()
 }

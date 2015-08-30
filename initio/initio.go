@@ -1,51 +1,45 @@
+// +build !linux,!arm
+
 package initio
 
 import (
-	"github.com/stianeikeland/go-rpio"
-	"log"
-	"os"
-	"os/signal"
+	"io/ioutil"
+	//"log"
+	"net/http"
 )
 
-func init() {
-	err := rpio.Open()
+// this will be an exact mirror of initio externally, but
+// will use the web API running on the actual robot, allowing
+// for more rapid remote development
+func init() {}
+
+var baseURL = "http://192.168.79.21/"
+
+func SetBaseURL(url string) {
+	baseURL = url
+}
+
+// make the request to the URL, returning success or error if failed
+func makeRequest(url string) ([]byte, int, error) {
+	//log.Println("making request to:", (baseURL + url))
+
+	resp, err := http.Get(baseURL + url)
 
 	if err != nil {
-		panic(err)
+		return nil, -1, err
 	}
 
-	// setup the servos
-	StartServos()
+	document, err := ioutil.ReadAll(resp.Body)
 
-	// initialise the two
-	pan := NewServo(Pan)
-	tilt := NewServo(Tilt)
+	if err != nil {
+		return nil, -1, err
+	}
 
-	// set them to known values
-	pan.Set(DEFAULT_VAL)
-	tilt.Set(DEFAULT_VAL)
-
-	// catch ^C, and cleanup appropriately
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-
-	go func() {
-		for _ = range c {
-			// sig is a ^C, handle it
-			log.Println("^C detected, closing cleanly...")
-
-			Cleanup()
-			rpio.Close()
-
-			os.Exit(0)
-		}
-	}()
+	return document, resp.StatusCode, err
 }
 
 func Cleanup() {
-	// we can open a new instance of motor - they're the same pins
-	m := NewMotor()
-	m.Stop()     // stop motors
-	StopServos() // stop servos
-	//	rpio.Close()
+	// do nothing. In the actual library this will do something necessary
+	// to ensure proper shutdown of the robot. but here, we can assume that is
+	// handled from the API
 }

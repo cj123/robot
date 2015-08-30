@@ -1,20 +1,40 @@
-// +build !linux,!arm
-
 package initio
 
 import (
 	"fmt"
 )
 
-type Motors struct{}
+type Motors struct {
+	// the motor points
+	a, b, p, q *PWMPin
+}
 
 func NewMotor() *Motors {
-	return &Motors{}
+	m := Motors{}
+
+	// initialise the pins
+	m.p = NewPWMPin(LeftMotor1)
+	m.p.Output()
+
+	m.q = NewPWMPin(LeftMotor2)
+	m.q.Output()
+
+	m.a = NewPWMPin(RightMotor1)
+	m.a.Output()
+
+	m.b = NewPWMPin(RightMotor2)
+	m.b.Output()
+
+	return &m
 }
 
 // stop both motors
 func (m Motors) Stop() {
-	makeRequest("/api/motors/stop")
+	m.p.Low()
+	m.q.Low()
+
+	m.a.Low()
+	m.b.Low()
 }
 
 // move forward at speed, 0 <= speed <= 100
@@ -24,7 +44,11 @@ func (m Motors) Forward(speed uint8) {
 		return
 	}
 
-	makeRequest(fmt.Sprintf("/api/motors/forwards/%d", speed))
+	m.p.pwm(speed)
+	m.q.Low()
+
+	m.a.pwm(speed)
+	m.b.Low()
 }
 
 // move backwards at speed, 0 <= speed <= 100
@@ -34,7 +58,11 @@ func (m Motors) Reverse(speed uint8) {
 		return
 	}
 
-	makeRequest(fmt.Sprintf("/api/motors/reverse/%d", speed))
+	m.p.Low()
+	m.q.pwm(speed)
+
+	m.a.Low()
+	m.b.pwm(speed)
 }
 
 // spin left (sets motors to turn at opposite directions at speed)
@@ -45,7 +73,11 @@ func (m Motors) SpinLeft(speed uint8) {
 		return
 	}
 
-	makeRequest(fmt.Sprintf("/api/motors/left/%d", speed))
+	m.p.pwm(speed)
+	m.q.Low()
+
+	m.a.Low()
+	m.b.pwm(speed)
 }
 
 // spin left (sets motors to turn at opposite directions at speed)
@@ -56,7 +88,11 @@ func (m Motors) SpinRight(speed uint8) {
 		return
 	}
 
-	makeRequest(fmt.Sprintf("/api/motors/right/%d", speed))
+	m.p.Low()
+	m.q.pwm(speed)
+
+	m.a.pwm(speed)
+	m.b.Low()
 }
 
 // TODO: moves forwards in an arc by setting different speeds
@@ -67,7 +103,6 @@ func (m Motors) TurnForward(leftSpeed uint8, rightSpeed uint8) {
 		return
 	}
 
-	// TODO: stubbed
 }
 
 // TODO: moves backwards in an arc by setting different speeds
@@ -78,5 +113,4 @@ func (m Motors) TurnReverse(leftSpeed uint8, rightSpeed uint8) {
 		return
 	}
 
-	// TODO: stubbed
 }

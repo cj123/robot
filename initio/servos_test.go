@@ -8,7 +8,7 @@ import (
 func TestServos(t *testing.T) {
 
 	panServo := NewServo(Pan)
-	tiltServo := NewServo(tilt)
+	tiltServo := NewServo(Tilt)
 
 	// move them around a bit
 	panServo.Set(10)
