@@ -1,8 +1,9 @@
 package initio
 
 import (
-	"github.com/stianeikeland/go-rpio"
 	"time"
+
+	"github.com/stianeikeland/go-rpio"
 )
 
 const (
@@ -13,13 +14,15 @@ const (
 	speedOfSound = 34029
 )
 
+// Sonar provides an interface for the Sonar sensor
 type Sonar struct{}
 
+// NewSonar instantiates Sonar functions
 func NewSonar() *Sonar {
 	return &Sonar{}
 }
 
-// return the distance in cm to the nearest reflecting object
+// GetDistance returns the distance in cm to the nearest reflecting object
 // 0 == no object
 func (s Sonar) GetDistance() int {
 	// setup sonar to be output

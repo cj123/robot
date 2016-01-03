@@ -1,10 +1,11 @@
 package initio
 
 import (
-	"github.com/stianeikeland/go-rpio"
 	"log"
 	"os"
 	"os/signal"
+
+	"github.com/stianeikeland/go-rpio"
 )
 
 func init() {
@@ -42,10 +43,17 @@ func init() {
 	}()
 }
 
+// Cleanup stops all Motors and Servos
 func Cleanup() {
 	// we can open a new instance of motor - they're the same pins
 	m := NewMotor()
 	m.Stop()     // stop motors
 	StopServos() // stop servos
 	//	rpio.Close()
+}
+
+// SetBaseURL is used by the "API" version of initio. To keep the interfaces
+// the same, this function is provided, but does nothing.
+func SetBaseURL(s string) {
+	// do nothing!
 }

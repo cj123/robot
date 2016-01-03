@@ -5,18 +5,21 @@ package initio
 // (specifically https://github.com/WiringPi/WiringPi/blob/master/wiringPi/softPwm.c)
 
 import (
-	"github.com/stianeikeland/go-rpio"
 	"time"
+
+	"github.com/stianeikeland/go-rpio"
 )
 
-// a gpio pin, with added pwm
+// PWMPin provides a gpio pin, with added pwm
 type PWMPin struct {
 	rpio.Pin
 	active bool
 }
 
+// RANGE is the range of the pins
 const RANGE = 100
 
+// NewPWMPin instantiates PWM on a pin
 func NewPWMPin(pin int) *PWMPin {
 	return &PWMPin{rpio.Pin(pin), false}
 }
@@ -48,7 +51,7 @@ func (p *PWMPin) stop() {
 	p.active = false
 }
 
-// override the pin's usual low, to stop pwm
+// Low overrides the pin's usual low, to stop pwm
 func (p *PWMPin) Low() {
 	p.stop()
 	p.Pin.Low()

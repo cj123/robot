@@ -11,16 +11,18 @@ var (
 	servosActive = false
 )
 
+// Servo is a servo pin
 type Servo struct {
 	Pin     int // i.e. tilt or pan
 	Current int // the current position
 }
 
+// NewServo instantiates servo on a pin
 func NewServo(pin int) *Servo {
 	return &Servo{Pin: pin}
 }
 
-// set a servo to a certain angle
+// Set a servo to a certain angle
 func (s *Servo) Set(degrees int) {
 	if !servosActive {
 		StartServos()
@@ -30,16 +32,17 @@ func (s *Servo) Set(degrees int) {
 	s.Current = degrees
 }
 
-// get the current value the servo is at
+// Get the current value the servo is at
 func (s *Servo) Get() int {
 	return s.Current
 }
 
+// Reset the servo pin
 func (s *Servo) Reset() {
 	s.Set(DEFAULT_VAL)
 }
 
-// increment (or decrement) a servo by a value
+// Inc increments (or decrements) a servo by a value
 func (s *Servo) Inc(increment int) {
 	val := s.Get()
 	val += increment
@@ -47,12 +50,12 @@ func (s *Servo) Inc(increment int) {
 	s.Set(val)
 }
 
-// stop the servos
+// StopServos stops the servos
 func StopServos() {
 	stopServod()
 }
 
-// start the servos
+// StartServos starts up the servo daemon
 func StartServos() {
 	err := startServod()
 
@@ -74,7 +77,6 @@ func startServod() error {
 
 	if err != nil {
 		fmt.Println(err)
-		panic(err)
 		return err
 	}
 
@@ -95,7 +97,6 @@ func stopServod() error {
 
 	if err != nil {
 		fmt.Println(err)
-		panic(err)
 		return err
 	}
 

@@ -4,11 +4,13 @@ import (
 	"fmt"
 )
 
+// Motors is used for powering the motors.
 type Motors struct {
 	// the motor points
 	a, b, p, q *PWMPin
 }
 
+// NewMotor instantiates the motor pins
 func NewMotor() *Motors {
 	m := Motors{}
 
@@ -28,7 +30,7 @@ func NewMotor() *Motors {
 	return &m
 }
 
-// stop both motors
+// Stop both motors
 func (m Motors) Stop() {
 	m.p.Low()
 	m.q.Low()
@@ -37,7 +39,7 @@ func (m Motors) Stop() {
 	m.b.Low()
 }
 
-// move forward at speed, 0 <= speed <= 100
+// Forward moves forward at speed, 0 <= speed <= 100
 func (m Motors) Forward(speed uint8) {
 	if speed > 100 || speed < 0 {
 		fmt.Println("speed out of range")
@@ -51,7 +53,7 @@ func (m Motors) Forward(speed uint8) {
 	m.b.Low()
 }
 
-// move backwards at speed, 0 <= speed <= 100
+// Reverse moves backwards at speed, 0 <= speed <= 100
 func (m Motors) Reverse(speed uint8) {
 	if speed > 100 || speed < 0 {
 		fmt.Println("speed out of range")
@@ -65,7 +67,7 @@ func (m Motors) Reverse(speed uint8) {
 	m.b.pwm(speed)
 }
 
-// spin left (sets motors to turn at opposite directions at speed)
+// SpinLeft sets motors to turn at opposite directions at speed
 // 0 <= speed <= 100
 func (m Motors) SpinLeft(speed uint8) {
 	if speed > 100 || speed < 0 {
@@ -80,7 +82,7 @@ func (m Motors) SpinLeft(speed uint8) {
 	m.b.pwm(speed)
 }
 
-// spin left (sets motors to turn at opposite directions at speed)
+// SpinRight sets motors to turn at opposite directions at speed
 // 0 <= speed <= 100
 func (m Motors) SpinRight(speed uint8) {
 	if speed > 100 || speed < 0 {
@@ -95,7 +97,7 @@ func (m Motors) SpinRight(speed uint8) {
 	m.b.Low()
 }
 
-// TODO: moves forwards in an arc by setting different speeds
+// TurnForward TODO: moves forwards in an arc by setting different speeds
 // 0 <= leftSpeed,rightSpeed <= 100
 func (m Motors) TurnForward(leftSpeed uint8, rightSpeed uint8) {
 	if leftSpeed > 100 || leftSpeed < 0 || rightSpeed > 100 || rightSpeed < 0 {
@@ -105,7 +107,7 @@ func (m Motors) TurnForward(leftSpeed uint8, rightSpeed uint8) {
 
 }
 
-// TODO: moves backwards in an arc by setting different speeds
+// TurnReverse TODO: moves backwards in an arc by setting different speeds
 // 0 <= leftSpeed,rightSpeed <= 100
 func (m Motors) TurnReverse(leftSpeed uint8, rightSpeed uint8) {
 	if leftSpeed > 100 || leftSpeed < 0 || rightSpeed > 100 || rightSpeed < 0 {

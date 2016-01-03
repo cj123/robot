@@ -3,7 +3,6 @@
 package initio
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )

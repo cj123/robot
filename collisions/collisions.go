@@ -15,6 +15,8 @@ const (
 	DIR_RIGHT
 	DIR_UNKNOWN
 
+	FULL_SPEED = 100
+
 	// type of reading
 	READING_QUICK Reading = iota
 	READING_FULL  Reading = iota
@@ -25,6 +27,8 @@ const (
 
 	// an adjustment to take from the time calculated on a corner
 	CORNER_ADJUST = 25 * time.Millisecond
+
+	TIME_BETWEEN_READINGS = 500 * time.Millisecond
 )
 
 var (
@@ -89,11 +93,11 @@ func MakeReadings(readingType Reading) {
 	start := time.Now()
 	numReadings := 0
 
-	for i := -90; i < 90; i += panStep {
+	for i := -85; i < 85; i += panStep {
 		// move the servo pan position
 		panServo.Set(i)
 
-		for j := -60; j < 90; j += tiltStep {
+		for j := -20; j < 70; j += tiltStep {
 			dist := sonar.GetDistance()
 
 			//fmt.Printf("(%d, %d) = %d\n", i, j, dist)
@@ -104,7 +108,7 @@ func MakeReadings(readingType Reading) {
 			// move the servo tilt position
 			tiltServo.Set(j)
 
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(TIME_BETWEEN_READINGS)
 			numReadings++
 		}
 	}
@@ -194,13 +198,13 @@ func checkIR() {
 			motors.Stop() // stop immediately
 
 			// reverse until the objects are gone
-			motors.Reverse(0)
+			motors.Reverse(FULL_SPEED)
 
 			for ir.Left() || ir.Right() {
 				time.Sleep(10 * time.Microsecond)
 
 				// block any other actions until we're out of danger
-				motors.Reverse(0)
+				motors.Reverse(FULL_SPEED)
 			}
 
 			motors.Stop()
@@ -218,13 +222,13 @@ func checkIR() {
 			motors.Stop() // stop now
 
 			// move forward until obstacle is gone
-			motors.Forward(0)
+			motors.Forward(FULL_SPEED)
 
 			for ir.BackLeft() || ir.BackRight() {
 				time.Sleep(10 * time.Microsecond)
 
 				// block other actions
-				motors.Forward(0)
+				motors.Forward(FULL_SPEED)
 			}
 
 			motors.Stop()
@@ -245,12 +249,12 @@ func Start(run *bool) bool {
 		log.Println("Collision avoidance initialised, but disabled for now")
 	}
 
-	go func() {
-		foundCollision = false
+	//go func() {
+	foundCollision = false
 
-		// start the IR sensor checking
-		checkIR()
-	}()
+	// start the IR sensor checking
+	//checkIR()
+	//}()
 
 	for {
 		// if we found a collision
@@ -271,44 +275,46 @@ func Start(run *bool) bool {
 		panServo.Set(maxKey)
 
 		// set the servo height, because... OCD
-		tiltServo.Set(initio.DEFAULT_VAL)
+		tiltServo.Reset()
 
 		// find the turn degrees required to do it
 		switch direction {
 		case DIR_FRONT:
 			// go forwards
-			motors.Forward(0) // speed still needs implementing
+			motors.Forward(FULL_SPEED) // speed still needs implementing
 			inMotion = true
 			time.Sleep(getTimeToMoveForwards(maxVal))
 			break
 		case DIR_LEFT:
-			motors.SpinLeft(0)
+
 			t := getTimeForTurn(maxKey)
 			log.Println("I should turn for", t)
+
+			motors.SpinLeft(FULL_SPEED)
 			inMotion = true
 			time.Sleep(t)
 
-			motors.Forward(0) // then keep going
+			motors.Forward(FULL_SPEED) // then keep going
 
 			// get the time to move forward, but take a small amount off
 			// because of the corner we just turned
 			time.Sleep(getTimeToMoveForwards(maxVal) - CORNER_ADJUST)
 			break
 		case DIR_RIGHT:
-			motors.SpinRight(0)
+			motors.SpinRight(FULL_SPEED)
 			t := getTimeForTurn(maxKey)
 			log.Println("I should turn for", t)
 			inMotion = true
 			time.Sleep(t)
 
-			motors.Forward(0) // then keep going
+			motors.Forward(FULL_SPEED) // then keep going
 
 			// get the time to move forward, but take a small amount off
 			// because of the corner we just turned
 			time.Sleep(getTimeToMoveForwards(maxVal) - CORNER_ADJUST)
 			break
 		default:
-			log.Println("broken")
+			log.Println("broken :(")
 		}
 
 		// stop moving
